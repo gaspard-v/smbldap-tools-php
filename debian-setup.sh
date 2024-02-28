@@ -40,7 +40,7 @@ sudo apt install libnss-ldapd libpam-ldapd -y
 ## libnss-ldapd configuration:
 ## check passwd, shadow and group
 
-
+sudo service slapd restart
 sudo service smbd restart
 sudo service nmbd restart
 sudo service nscd restart
