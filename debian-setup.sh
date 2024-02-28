@@ -35,10 +35,30 @@ sudo smbpasswd -w 123
 sudo service smbd restart
 sudo service nmbd restart
 
-sudo apt install libnss-ldap -y
+sudo apt install libnss-ldapd libpam-ldapd -y
+## IMPORTANT
+## libnss-ldapd configuration:
+## check passwd, shadow and group
+
 
 sudo service smbd restart
 sudo service nmbd restart
+sudo service nscd restart
+sudo service nslcd restart
 
-sudo useradd --create-home --home=/media/hdd1/usertest --user-group --comment=usertest usertest
-sudo smbldap-useradd -a -P -m usertest
+# create the user group
+sudo smbldap-groupadd -a usertest
+
+# -c comment
+# -a create samba and unix account
+# -P invoke smbldap-passwd
+# -m create home directory
+# -g add primary group
+# -G add secondary groups
+sudo smbldap-useradd -c "usertest comment" -a -P -m -g usertest -G "Domain Users" usertest
+
+## DEPRECIATED
+## creating an unix user, presents in /etc/passwd and /etc/shadow is DEPRECIATED
+## since libnss-ldapd and libpam-ldapd handle manage user via the LDAP server
+## use `getent passwd`
+#sudo useradd --create-home --home=/media/hdd1/usertest --user-group --comment=usertest usertest
