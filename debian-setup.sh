@@ -15,15 +15,17 @@ sudo chown root:root "/etc/samba/smb.conf"
 sudo dpkg-reconfigure slapd
 
 sudo service slapd restart
-cat "/usr/share/doc/samba/examples/LDAP/samba.ldif" | sudo ldapadd -Q -Y EXTERNAL -H ldapi:///
+cat "samba.ldif" | sudo ldapadd -Q -Y EXTERNAL -H ldapi:///
 
 sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f samba_indices.ldif
 sudo service slapd restart
 
+sudo smbpasswd -w 123
+
 sudo service smbd restart
 
-#sudo smbldap-config
-sudp cp --verbose --force "/etc/smbldap-tools/smbldap_bind.conf" "/etc/smbldap-tools/smbldap_bind.conf.origin"
+sudo smbldap-config
+sudo cp --verbose --force "/etc/smbldap-tools/smbldap_bind.conf" "/etc/smbldap-tools/smbldap_bind.conf.origin"
 sudo cp --verbose --force "smbldap_bind.conf" "/etc/smbldap-tools/smbldap_bind.conf"
 sudo chown root:root "/etc/smbldap-tools/smbldap_bind.conf"
 sudo chmod 600 "/etc/smbldap-tools/smbldap_bind.conf"
@@ -31,7 +33,6 @@ sudo chmod 600 "/etc/smbldap-tools/smbldap_bind.conf"
 sudo slapcat -l backup.ldif
 sudo smbldap-populate -g 10000 -u 10000 -r 10000
 
-sudo smbpasswd -w 123
 sudo service smbd restart
 sudo service nmbd restart
 
