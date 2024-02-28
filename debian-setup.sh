@@ -61,4 +61,4 @@ sudo smbldap-useradd -c "usertest comment" -a -P -m -g usertest -G "Domain Users
 ## creating an unix user, presents in /etc/passwd and /etc/shadow is DEPRECIATED
 ## since libnss-ldapd and libpam-ldapd handle manage user via the LDAP server
 ## use `getent passwd`
-#sudo useradd --create-home --home=/media/hdd1/usertest --user-group --comment=usertest usertest
+#sudo useradd --create-home --home=/home/usertest --user-group --comment=usertest usertest
