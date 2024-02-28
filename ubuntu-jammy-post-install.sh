@@ -14,4 +14,5 @@ php8.3-ldap \
 php8.3-mbstring \
 php8.3-oauth \
 php8.3-xml \
-php8.3-xdebug
+php8.3-xdebug \
+php8.3-curl
