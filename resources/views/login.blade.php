@@ -5,16 +5,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Welcome</title>
+    <title>Login</title>
 
 </head>
 
 <body>
-    @if (Route::has('login'))
-    <a href="{{ route('login') }}">Login</a>
-    @else
-    <p>Website is in maintenance mode</p>
-    @endif
+    <h1>
+        TODO
+    </h1>
 </body>
 
 </html>
