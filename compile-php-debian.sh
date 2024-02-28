@@ -19,16 +19,20 @@ libpq-dev \
 libreadline-dev \
 libsodium-dev \
 libxml2-dev \
-libzip-dev
+libzip-dev \
+libsqlite3-dev
 
 mkdir --verbose --parent "/tmp/php-build"
+cd "/tmp/php-build"
 git clone https://github.com/php/php-src.git --branch=master
-cd php-src
+cd "php-src"
 ./buildconf
 
 ./configure \
+--prefix=/usr/local/php \
 --enable-bcmath=shared \
---enable-bz2=shared \
+--with-fpm-systemd \
+--with-bz2=shared \
 --with-curl=shared \
 --enable-exif=shared \
 --with-ffi=shared \
@@ -51,3 +55,7 @@ cd php-src
 --enable-soap=shared \
 --with-libxml=shared \
 --with-zip=shared
+
+./config.nice
+
+make -j $(nproc)
