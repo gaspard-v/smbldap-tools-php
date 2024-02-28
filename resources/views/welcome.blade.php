@@ -11,7 +11,7 @@
 
 <body>
     @if (Route::has('login'))
-    <a href="{{ route('login') }}">Login</a>
+    <a href="{{ route('login', absolute: false) }}">Login</a>
     @else
     <p>Website is in maintenance mode</p>
     @endif
