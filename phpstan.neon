@@ -1,0 +1,8 @@
+includes:
+    - phpstan.neon.dist
+    - vendor/larastan/larastan/extension.neon
+    - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
+
+parameters:
+    parallel:
+        maximumNumberOfProcesses: 4
