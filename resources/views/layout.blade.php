@@ -8,6 +8,7 @@
     </head>
     <body>
         <header>
+            <h2><a href={{ url('/') }}>Index</a></h2>
             <h1>@yield('title', 'Welcome')</h1>
         </header>
         <main>
