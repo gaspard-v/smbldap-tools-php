@@ -18,7 +18,7 @@ class LdapLoginTest extends TestCase
     public function test_login(): void
     {
         $connection = Container::getDefaultConnection();
-        $user = User::findByOrFail('sn', 'usertest');
+        $user = User::findByOrFail('uid', 'usertest');
         $dn = $user->getDn();
         $testResonse = $connection->auth()->attempt($dn, '123');
         $this->assertTrue($testResonse);

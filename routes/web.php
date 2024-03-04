@@ -30,7 +30,7 @@ Route::post(
 
 Route::get('/dashboard', function () {
     $user = Auth::user();
-    [$username] = $user->sn;
+    [$username] = $user->uid;
     return view(
         'dashboard',
         ['username' => $username]

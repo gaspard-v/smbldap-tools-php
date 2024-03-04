@@ -19,7 +19,7 @@ class LoginController extends Controller
             'password' => ['required'],
         ], $messages);
         $credentials = [
-            'sn' => $credentials['username'],
+            'uid' => $credentials['username'],
             'password' => $credentials['password'],
         ];
         if (Auth::attempt($credentials)) {
