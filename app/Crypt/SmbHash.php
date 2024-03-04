@@ -172,7 +172,7 @@ abstract class SmbHash
         for ($i = 0; $i < 8; $i++) {
             $out[$i] = 0;
         }
-        for ($i = 0; $i < 65; $i++) {
+        for ($i = 0; $i < 64; $i++) {
             if ($outb[$i]) {
                 $out[$i / 8] |= (1 << (7 - ($i % 8)));
             }
