@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,3 +27,12 @@ Route::post(
     '/login',
     [LoginController::class, 'authenticate']
 )->name('login');
+
+Route::get('/dashboard', function () {
+    $user = Auth::user();
+    [$username] = $user->sn;
+    return view(
+        'dashboard',
+        ['username' => $username]
+    );
+})->name('dashboard')->middleware('auth');
