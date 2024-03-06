@@ -18,7 +18,7 @@ abstract class Shadow
         $address = "tcp://{$address}";
         $context = stream_context_create();
         $socket = stream_socket_client($address, $error_code, $error_message, 10, STREAM_CLIENT_CONNECT, $context);
-        fwrite($socket, "test");
+        stream_socket_sendto($socket, "test");
         try {
             fclose($socket);
         } catch (Exception $err) {
