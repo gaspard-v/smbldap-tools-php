@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Auth;
 
-use App\Unix\Shadow;
+use App\Miniserver\Shadow;
 
 /*
 |--------------------------------------------------------------------------
