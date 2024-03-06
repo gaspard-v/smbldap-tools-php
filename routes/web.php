@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Auth;
 
+use App\Unix\Shadow;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 */
 
 Route::get('/', function () {
+    Shadow::chpasswd("", "", "");
     return view('welcome');
 });
 
