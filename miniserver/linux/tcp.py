@@ -1,4 +1,11 @@
+from abc import ABC, abstractmethod
 import socket
+
+class ConsumerAbstract(ABC):
+    
+    @abstractmethod
+    def consume(self, data: bytearray):
+        ...
 
 class ServerBuilder:
     def __init__(
@@ -19,6 +26,10 @@ class ServerBuilder:
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.settimeout(self.timeout)
         return self
+
+    def set_consumer(self, consumer: ConsumerAbstract):
+        self.consumer = consumer
+        return self
     
     def run(self):
         while True:
@@ -29,3 +40,4 @@ class ServerBuilder:
             data = bytearray()
             while packet := conn.recv(8192):
                 data.extend(packet)
+            self.consumer.consume(data)
