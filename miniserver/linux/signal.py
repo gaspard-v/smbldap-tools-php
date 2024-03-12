@@ -6,7 +6,6 @@ class Signal(metaclass=SingletonMeta):
     stop_signal: bool = False
     
     def _stop_signal_handler(self, sig, frame):
-        print("Got stop signal...")
         self.stop_signal = True
     
     def capture(self):
