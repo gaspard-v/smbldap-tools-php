@@ -6,6 +6,10 @@ class ConsumerAbstract(ABC):
     @abstractmethod
     def consume(self, data: bytearray):
         ...
+    
+    @abstractmethod
+    def stop_loop(self):
+        ...
 
 class ServerBuilder:
     def __init__(
@@ -13,7 +17,7 @@ class ServerBuilder:
         address: str = "127.0.0.1",
         port: int = 48751,
         *,
-        timeout: int = 3
+        timeout: int = 1
     ) -> None:
         self.address = address
         self.port = port
@@ -32,7 +36,7 @@ class ServerBuilder:
         return self
     
     def run(self):
-        while True:
+        while not self.consumer.stop_loop() :
             try:
                 conn, addr = self.socket.accept()
             except socket.timeout:
