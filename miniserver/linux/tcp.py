@@ -44,4 +44,9 @@ class ServerBuilder:
             data = bytearray()
             while packet := conn.recv(8192):
                 data.extend(packet)
-            self.consumer.consume(data)
+            return_data = self.consumer.consume(data)
+            if return_data:
+                conn.sendall(return_data)
+            conn.close()
+            
+            

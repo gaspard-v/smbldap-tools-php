@@ -1,6 +1,7 @@
 import spwd
 import crypt
 import io
+from ..exceptions.shadow import WrongPasswordException, UnknowUserException
 
 class Chpasswd:
 
@@ -16,11 +17,14 @@ class Chpasswd:
 
 
     def verify_password(self):
-        user_entry = spwd.getspnam(self.username)
+        try:
+            user_entry = spwd.getspnam(self.username)
+        except FileNotFoundError as err:
+            raise UnknowUserException(self.username) from err
         encrypted_password = user_entry.sp_pwdp
         hash  = crypt.crypt(self.old_password, encrypted_password)
         if hash != encrypted_password:
-            raise Exception("Wrong password")
+            raise WrongPasswordException(self.username)
         return self
 
     def _create_new_hash(self):

@@ -28,7 +28,7 @@ class TestBuilder:
 
 def main():
     message = {
-        "username": "loled",
+        "username": "loleds",
         "old_password": "123",
         "new_password": "123"
     }
