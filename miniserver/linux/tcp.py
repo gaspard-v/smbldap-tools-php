@@ -59,8 +59,8 @@ class ServerBuilder:
     
     def create_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind((self.address, self.port))
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.bind((self.address, self.port))
         self.socket.listen(1)
         self.socket.settimeout(self.timeout)
         log().info(f"Listening on {self.address}:{self.port}")
