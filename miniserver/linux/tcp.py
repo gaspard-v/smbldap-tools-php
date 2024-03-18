@@ -1,7 +1,11 @@
 from abc import ABC, abstractmethod
+from os import error
 import socket
 import json
+import struct
 from typing import Optional
+from ..models.tcp.error import build_error_response
+from dataclasses import asdict
 
 class ConsumerAbstract(ABC):
     
@@ -15,10 +19,12 @@ class ConsumerAbstract(ABC):
     
     @abstractmethod
     def handle_error(self, error: Exception) -> Optional[bytearray|bytes]:
-        error_obj = {
-            "error_code": 500,
-            "message": "Server Error"
-        }
+        error_obj = build_error_response(
+            500,
+            str(type(error)),
+            str(error)
+        )
+        error_dict = asdict(error_obj)
         error_bytes = json.dumps(error_obj).encode()
         return error_bytes
 
@@ -28,11 +34,15 @@ class ServerBuilder:
         address: str = "127.0.0.1",
         port: int = 48751,
         *,
-        timeout: int = 1
+        timeout: int = 1,
+        buffer_size: int = 8192,
+        header_size: int = 4
     ) -> None:
         self.address = address
         self.port = port
         self.timeout = timeout
+        self.buffer_size = buffer_size
+        self.header_size = header_size
     
     def create_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -45,12 +55,33 @@ class ServerBuilder:
     def set_consumer(self, consumer: ConsumerAbstract):
         self.consumer = consumer
         return self
+    
+    def _get_data_size(self, conn: socket.socket) -> int:
+        header = conn.recv(self.header_size)
+        if not header:
+            raise Exception("TODO")
+        return struct.unpack('!I', header)[0]
 
     def _get_data(self, conn: socket.socket) -> bytearray:
         data = bytearray()
-        while packet := conn.recv(8192):
-            data.extend(packet)
+        remaining_size = self._get_data_size(conn)
+        while remaining_size > 0:
+            chunk = conn.recv(min(self.buffer_size, remaining_size))
+            if not chunk:
+                break
+            data.extend(chunk)
+            remaining_size -= len(chunk)
         return data
+    
+    def _send(
+        self,
+        conn: socket.socket,
+        data: bytearray|bytes
+    ):
+        header = struct.pack('!I', len(data))
+        conn.sendall(header)
+        conn.sendall(data)
+        
     
     def _error(
         self, 
@@ -61,15 +92,16 @@ class ServerBuilder:
             return
         if not conn:
             return
-        conn.sendall(error_data)
+        return self._send(conn, error_data)
     
     def _loop(self):
+        conn = None
         try:
             conn, _ = self.socket.accept()
             data = self._get_data(conn)
             return_data = self.consumer.consume(data)
             if return_data:
-                conn.sendall(return_data)
+                self._send(conn, return_data)
         except socket.timeout:
             return
         except Exception as err:
