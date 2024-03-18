@@ -7,6 +7,8 @@ from typing import Optional
 from ..models.tcp.error import build_error_response
 from ..models.tcp.response import Response
 from dataclasses import asdict
+from .exceptions import MalformedPacket
+from ..utils.logger import log
 
 class ConsumerAbstract(ABC):
     
@@ -37,6 +39,7 @@ class ConsumerAbstract(ABC):
     
     @abstractmethod
     def handle_error(self, error: Exception) -> Optional[bytearray|bytes]:
+        log().exception(error)
         return self._get_error_message(error, 500)
 
 class ServerBuilder:
@@ -61,6 +64,8 @@ class ServerBuilder:
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.listen(1)
         self.socket.settimeout(self.timeout)
+        log().info(f"Listening on {self.address}:{self.port}")
+        log().debug(f"Timeout: {self.timeout}, buffer size: {self.buffer_size}, header size: {self.header_size}")
         return self
 
     def set_consumer(self, consumer: ConsumerAbstract):
@@ -70,7 +75,7 @@ class ServerBuilder:
     def _get_data_size(self, conn: socket.socket) -> int:
         header = conn.recv(self.header_size)
         if not header:
-            raise Exception("TODO")
+            raise MalformedPacket("Packet does not contain a header!")
         return struct.unpack('!I', header)[0]
 
     def _get_data(self, conn: socket.socket) -> bytearray:
@@ -79,7 +84,7 @@ class ServerBuilder:
         while remaining_size > 0:
             chunk = conn.recv(min(self.buffer_size, remaining_size))
             if not chunk:
-                break
+                raise MalformedPacket("Empty chunk! Check the header!")
             data.extend(chunk)
             remaining_size -= len(chunk)
         return data
@@ -108,20 +113,22 @@ class ServerBuilder:
     def _loop(self):
         conn = None
         try:
-            conn, _ = self.socket.accept()
+            conn, addr = self.socket.accept()
+            log().debug(f"accepted connection with {addr}")
             data = self._get_data(conn)
             return_data = self.consumer.consume(data)
             if return_data:
                 self._send(conn, return_data)
         except socket.timeout:
+            log().debug(f"Socket has timed out. (This is an expected behavior)")
             return
         except Exception as err:
-            # TODO print error
             error_data = self.consumer.handle_error(err)
             return self._error(conn, error_data)
         finally:
             if conn:
                 conn.close()
+                log().debug(f"closing connection with {addr}")
 
     def run(self):
         while not self.consumer.stop_loop() :

@@ -2,6 +2,7 @@ import spwd
 import crypt
 import io
 from ..exceptions.shadow import WrongPasswordException, UnknowUserException
+from ..utils.logger import log
 
 class Chpasswd:
 
@@ -55,5 +56,6 @@ class Chpasswd:
     def modify_password(self):
         hashed_password = self._create_new_hash()
         self._modify_shadow_file(hashed_password)
+        log().info(f"{self.username} has modified its password!")
         return self
         

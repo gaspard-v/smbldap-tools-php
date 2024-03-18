@@ -1,5 +1,5 @@
 from typing import Optional
-
+from ..utils.logger import log
 
 class WrongPasswordException(Exception):
     def __init__(
@@ -9,6 +9,7 @@ class WrongPasswordException(Exception):
     ):
         default_message = f'Wrong password for user "{username}"'
         self.message = message or default_message
+        log().info(self.message)
         super().__init__(self.message)
         
 class UnknowUserException(Exception):
@@ -19,6 +20,7 @@ class UnknowUserException(Exception):
     ):
         default_message = f'Unknow user "{username}"'
         self.message = message or default_message
+        log().info(self.message)
         super().__init__(self.message)
         
 class InvalidCredentialException(Exception):
