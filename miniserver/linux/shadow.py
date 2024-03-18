@@ -39,7 +39,7 @@ class Chpasswd:
                 continue
             fields[1] = hashed_password
             new_line = ':'.join(fields)
-            new_lines.append(new_line + '\n')
+            new_lines.append(new_line)
         return new_lines
             
     

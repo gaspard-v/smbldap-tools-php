@@ -16,8 +16,8 @@ class ShadowConsumer(ConsumerAbstract):
         obj = json.loads(data)
         shadow = Shadow(**obj)
         chpasswd = Chpasswd(shadow.username, shadow.old_password, shadow.new_password)
-        chpasswd.verify_password()
-        return "oof".encode()
+        chpasswd.verify_password().modify_password()
+        return self._get_response_message("Password modified successfully", 200)
 
     def stop_loop(self):
         return self.signal.stop_signal
@@ -35,7 +35,8 @@ class ShadowConsumer(ConsumerAbstract):
             WrongPasswordException
         )
         user_exception = (
-            ValidationError
+            ValidationError,
+            json.decoder.JSONDecodeError
         )
         if isinstance(error, credential_exception):
             return self._handle_credential_exception()

@@ -5,6 +5,7 @@ import json
 import struct
 from typing import Optional
 from ..models.tcp.error import build_error_response
+from ..models.tcp.response import Response
 from dataclasses import asdict
 
 class ConsumerAbstract(ABC):
@@ -25,6 +26,14 @@ class ConsumerAbstract(ABC):
         )
         error_dict = asdict(error_obj)
         return json.dumps(error_dict).encode()
+    
+    def _get_response_message(self, message: str, status_code: int) -> bytes:
+        response_obj = Response(
+            status_code,
+            message
+        )
+        response_dict = asdict(response_obj)
+        return json.dumps(response_dict).encode()
     
     @abstractmethod
     def handle_error(self, error: Exception) -> Optional[bytearray|bytes]:
@@ -49,8 +58,8 @@ class ServerBuilder:
     def create_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.address, self.port))
-        self.socket.listen(1)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.listen(1)
         self.socket.settimeout(self.timeout)
         return self
 
