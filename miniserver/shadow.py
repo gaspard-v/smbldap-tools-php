@@ -4,7 +4,7 @@ from .linux.signal import Signal
 from .models.shadow import Shadow
 from .linux.shadow import Chpasswd
 from .exceptions.shadow import UnknowUserException, WrongPasswordException, InvalidCredentialException
-from .models.tcp.error import build_error_response
+from pydantic import ValidationError
 import json
 
 class ShadowConsumer(ConsumerAbstract):
@@ -22,19 +22,24 @@ class ShadowConsumer(ConsumerAbstract):
     def stop_loop(self):
         return self.signal.stop_signal
     
+    def _handle_credential_exception(self) -> bytes:
+        new_exception = InvalidCredentialException()
+        return self._get_error_message(
+            new_exception,
+            400
+        )
+    
     def handle_error(self, error: Exception):
-        user_errors = (
+        credential_exception = (
             UnknowUserException, 
             WrongPasswordException
         )
-        if not isinstance(error, user_errors):
-            super().handle_error(error)
-        
-        new_exception = InvalidCredentialException()
-        error_obj = build_error_response(
-            400,
-            str(type(new_exception)),
-            new_exception.message
+        user_exception = (
+            ValidationError
         )
-        error_dict = asdict(error_obj)
-        return json.dumps(error_dict).encode()
+        if isinstance(error, credential_exception):
+            return self._handle_credential_exception()
+        if isinstance(error, user_exception):
+            return self._get_error_message(error, 400)
+        return super().handle_error(error)
+        

@@ -47,7 +47,7 @@ def main():
     message = {
         "username": "loled",
         "old_password": "123",
-        "new_password": "123"
+        "neww_password": "123"
     }
     message_str = json.dumps(message)
     message_byte = message_str.encode()

@@ -16,17 +16,19 @@ class ConsumerAbstract(ABC):
     @abstractmethod
     def stop_loop(self) -> bool:
         ...
-    
-    @abstractmethod
-    def handle_error(self, error: Exception) -> Optional[bytearray|bytes]:
+        
+    def _get_error_message(self, error: Exception, status_code: int) -> bytes:
         error_obj = build_error_response(
-            500,
+            status_code,
             str(type(error)),
             str(error)
         )
         error_dict = asdict(error_obj)
-        error_bytes = json.dumps(error_obj).encode()
-        return error_bytes
+        return json.dumps(error_dict).encode()
+    
+    @abstractmethod
+    def handle_error(self, error: Exception) -> Optional[bytearray|bytes]:
+        return self._get_error_message(error, 500)
 
 class ServerBuilder:
     def __init__(
