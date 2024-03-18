@@ -76,14 +76,14 @@ class TcpBuilder
     /**
      * Envoie un message via le socket
      * @param string $message Le message à envoyer
-     * @return bool True en cas de succès, false sinon
+     * @return self
      */
     public function send($message)
     {
         $header  = pack('N', strlen($message));
-        $result  = socket_write($this->client_socket, $header);
-        $result += socket_write($this->client_socket, $message);
-        return $result;
+        socket_write($this->client_socket, $header);
+        socket_write($this->client_socket, $message);
+        return $this;
     }
 
     /**
