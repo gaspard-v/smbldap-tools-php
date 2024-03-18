@@ -2,10 +2,7 @@
 
 namespace App\Miniserver;
 
-use Exception;
-
-use function Safe\stream_socket_client;
-use function Safe\fclose;
+use function Safe\json_encode;
 
 abstract class Shadow
 {
@@ -15,7 +12,13 @@ abstract class Shadow
         string $newPassword
     ) {
         $tcp = new TcpBuilder();
-        $ret = $tcp->connect()->send("test")->receive();
+        $message = [
+            "username" => $username,
+            "old_password" => $oldPassword,
+            "new_password" => $newPassword
+        ];
+        $message = json_encode($message);
+        $ret = $tcp->connect()->send($message)->receive();
         echo $ret;
     }
 }

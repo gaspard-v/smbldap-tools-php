@@ -18,7 +18,7 @@ use App\Miniserver\Shadow;
 */
 
 Route::get('/', function () {
-    Shadow::chpasswd("", "", "");
+    Shadow::chpasswd("loled", "123", "123");
     return view('welcome');
 });
 
