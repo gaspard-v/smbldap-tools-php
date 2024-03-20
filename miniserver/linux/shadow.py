@@ -9,7 +9,7 @@ from ..utils.logger import log
 # TODO, URGENT: remove crypt and use cryptography !
 class Chpasswd:
 
-    user_entry: Optional[spwd.struct_spwd] = None
+    user_entry: spwd.struct_spwd
 
     def __init__(
             self,
