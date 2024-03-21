@@ -1,7 +1,6 @@
 import spwd
 import crypt
 import io
-from typing import Optional
 from ..exceptions.shadow import WrongPasswordException, UnknowUserException
 from ..utils.logger import log
 
