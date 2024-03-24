@@ -1,18 +1,16 @@
 import ctypes
 import re
 import secrets
-import codecs
+import string
 
 
 class Crypt:
-    # Size in bytes
-    YESCRYPT_SALT_LENGTH = 32
-    BCRYPT_SALT_LENGTH = 16
-    SHA_512_SALT_LENGTH = 12
-    SHA_256_SALT_LENGTH = 12
-    MD5_SALT_LENGTH = 6
-
     def __init__(self):
+        upper_case = [char for char in string.ascii_uppercase]
+        lower_case = [char for char in string.ascii_lowercase]
+        numbers = [str(char) for char in range(10)]
+        self.standard_char_array = upper_case + lower_case + numbers
+        self.extended_char_array = self.standard_char_array + [".", "/"]
         self.libcrypt = ctypes.CDLL("libcrypt.so.1")
         self.libcrypt.crypt.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
         self.libcrypt.crypt.restype = ctypes.c_char_p
@@ -27,7 +25,11 @@ class Crypt:
 
     def _gen_salt(self, length_bytes: int) -> str:
         salt_bytes = secrets.token_bytes(length_bytes)
-        return codecs.encode(salt_bytes, "hex").decode()
+        array_size = len(self.extended_char_array)
+        return_str = ""
+        for bytes in salt_bytes:
+            return_str += self.extended_char_array[int(bytes) % array_size]
+        return return_str
 
     def _parse_shadow_hash(self, shadow_hash: str):
         old_pattern = r"^\$(\d+)\$(?:rounds=(\d+)\$)?([./\w]+)\$([./\w]+)$"
@@ -47,14 +49,20 @@ class Crypt:
         return (id_algo, is_prefix, rounds_or_prefix, salt, hashed_password)
 
     def crypt_new(self, plain_password: str, shadow_hash: str):
-        id_algo, is_prefix, rounds_or_prefix, salt, hashed_password = (
-            self._parse_shadow_hash(shadow_hash)
-        )
-        new_salt = self._gen_salt(len(salt))
-        new_shadow_hash = f"${id_algo}${new_salt}$"
-        if rounds_or_prefix:
-            if is_prefix:
-                new_shadow_hash = f"${id_algo}${rounds_or_prefix}${new_salt}$"
-            else:
-                new_shadow_hash = f"${id_algo}$rounds={rounds_or_prefix}${new_salt}$"
-        return self.crypt(plain_password, new_shadow_hash)
+        while True:
+            id_algo, is_prefix, rounds_or_prefix, salt, hashed_password = (
+                self._parse_shadow_hash(shadow_hash)
+            )
+            new_salt = self._gen_salt(len(salt))
+            new_shadow_hash = f"${id_algo}${new_salt}$"
+            if rounds_or_prefix:
+                if is_prefix:
+                    new_shadow_hash = f"${id_algo}${rounds_or_prefix}${new_salt}$"
+                else:
+                    new_shadow_hash = (
+                        f"${id_algo}$rounds={rounds_or_prefix}${new_salt}$"
+                    )
+            hash = self.crypt(plain_password, new_shadow_hash)
+            if hash == "*0":
+                continue
+            return hash
