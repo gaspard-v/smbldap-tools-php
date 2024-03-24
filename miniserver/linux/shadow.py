@@ -1,11 +1,10 @@
 import spwd
-import crypt
+from .crypt import Crypt
 import io
 from ..exceptions.shadow import WrongPasswordException, UnknowUserException
 from ..utils.logger import log
 
 
-# TODO, URGENT: remove crypt and use cryptography !
 class Chpasswd:
     user_entry: spwd.struct_spwd
 
@@ -13,6 +12,7 @@ class Chpasswd:
         self.username = username
         self.old_password = old_password
         self.new_password = new_password
+        self.crypt = Crypt()
 
     def _get_user_entry(self):
         if self.user_entry:
@@ -25,7 +25,7 @@ class Chpasswd:
     def verify_password(self):
         self._get_user_entry()
         encrypted_password = self.user_entry.sp_pwdp
-        hash = crypt.crypt(self.old_password, encrypted_password)
+        hash = self.crypt.crypt(self.old_password, encrypted_password)
         if hash != encrypted_password:
             raise WrongPasswordException(self.username)
         return self
@@ -33,7 +33,7 @@ class Chpasswd:
     def _create_new_hash(self):
         self._get_user_entry()
         encrypted_password = self.user_entry.sp_pwdp
-        return crypt.crypt(self.new_password, crypt.METHOD_CRYPT)
+        return self.crypt.crypt_new(self.new_password, encrypted_password)
 
     def _new_shadow_file(
         self, shadow_file: io.TextIOWrapper, hashed_password: str
