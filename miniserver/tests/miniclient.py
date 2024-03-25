@@ -1,9 +1,9 @@
 import socket
-import json
 import struct
+import json
 
 
-class TestBuilder:
+class Miniclient:
     def __init__(self, address: str = "127.0.0.1", port: int = 48751) -> None:
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.address = address
@@ -19,7 +19,7 @@ class TestBuilder:
             raise Exception("TODO")
         return struct.unpack("!I", header)[0]
 
-    def send_message(self, message):
+    def send(self, message: bytes):
         header = struct.pack("!I", len(message))
         self.client_socket.sendall(header)
         self.client_socket.sendall(message)
@@ -36,19 +36,15 @@ class TestBuilder:
             remaining_size -= len(chunk)
         return data
 
+    def send_message(self, message: dict):
+        message_str = json.dumps(message)
+        message_byte = message_str.encode()
+        return self.send(message_byte)
+
+    def recv_message(self):
+        message_byte = self.recv()
+        message_str = message_byte.decode()
+        return json.loads(message_str)
+
     def close(self):
         self.client_socket.close()
-
-
-def main():
-    message = {"username": "loled", "old_password": "123", "new_password": "123"}
-    message_str = json.dumps(message)
-    message_byte = message_str.encode()
-    tester = TestBuilder()
-    data = tester.connect().send_message(message_byte).recv()
-    print(data.decode())
-    tester.close()
-
-
-if __name__ == "__main__":
-    main()

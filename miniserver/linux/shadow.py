@@ -3,16 +3,18 @@ from .crypt import Crypt
 import io
 from ..exceptions.shadow import WrongPasswordException, UnknowUserException
 from ..utils.logger import log
+from typing import Optional
 
 
 class Chpasswd:
-    user_entry: spwd.struct_spwd
+    user_entry: Optional[spwd.struct_spwd]
 
     def __init__(self, username: str, old_password: str, new_password: str) -> None:
         self.username = username
         self.old_password = old_password
         self.new_password = new_password
         self.crypt = Crypt()
+        self.user_entry = None
 
     def _get_user_entry(self):
         if self.user_entry:
@@ -24,6 +26,8 @@ class Chpasswd:
 
     def verify_password(self):
         self._get_user_entry()
+        if not self.user_entry:
+            raise Exception("No user entry!")
         encrypted_password = self.user_entry.sp_pwdp
         hash = self.crypt.crypt(self.old_password, encrypted_password)
         if hash != encrypted_password:
@@ -32,6 +36,8 @@ class Chpasswd:
 
     def _create_new_hash(self):
         self._get_user_entry()
+        if not self.user_entry:
+            raise Exception("No user entry!")
         encrypted_password = self.user_entry.sp_pwdp
         return self.crypt.crypt_new(self.new_password, encrypted_password)
 
