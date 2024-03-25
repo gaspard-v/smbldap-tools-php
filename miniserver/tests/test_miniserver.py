@@ -23,6 +23,15 @@ class TestMiniserver(unittest.TestCase):
         self.miniclient.close()
         self.assertTrue(dict(self.success_message) == dict(recv_message))
 
+    def test_wrong_old_password(self):
+        message = self.message.copy()
+        message["old_password"] = "1234"
+        recv_message = self.miniclient.connect().send_message(message).recv_message()
+        self.miniclient.close()
+        self.assertFalse(dict(self.success_message) == dict(recv_message))
+        self.assertTrue(recv_message["status_code"] == 400)
+        self.assertTrue(recv_message["error"]["error_message"] == "Invalid Credentials")
+
 
 if __name__ == "__main__":
     unittest.main()
