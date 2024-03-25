@@ -21,11 +21,19 @@ class TestMiniserver(unittest.TestCase):
             self.miniclient.connect().send_message(self.message).recv_message()
         )
         self.miniclient.close()
-        self.assertTrue(dict(self.success_message) == dict(recv_message))
+        self.assertEqual(dict(self.success_message), dict(recv_message))
 
-    def test_wrong_old_password(self):
+    def test_incorrect_old_password(self):
         message = self.message.copy()
         message["old_password"] = "1234"
+        self._incorrect_credentials(message)
+
+    def test_incorrect_username(self):
+        message = self.message.copy()
+        message["username"] = "foo"
+        self._incorrect_credentials(message)
+
+    def _incorrect_credentials(self, message: dict):
         recv_message = self.miniclient.connect().send_message(message).recv_message()
         self.miniclient.close()
         self.assertNotEqual(dict(self.success_message), dict(recv_message))
