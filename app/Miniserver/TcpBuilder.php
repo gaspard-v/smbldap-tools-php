@@ -59,16 +59,14 @@ class TcpBuilder
      */
     protected function getDataSize()
     {
-        try {
-            $header = socket_read(
-                $this->client_socket,
-                $this->headerSize
-            );
-        } catch (SocketsException $err) {
-            throw new \Exception("Erreur lors de la lecture de l'en-tête");
-        }
+
+        $header = socket_read(
+            $this->client_socket,
+            $this->headerSize
+        );
+
         if ($header === "") {
-            throw new \Exception("La connexion a été fermée");
+            throw new SocketsException("Unexpected empty header");
         }
         return current(unpack('N', $header));
     }
@@ -78,7 +76,7 @@ class TcpBuilder
      * @param string $message Le message à envoyer
      * @return self
      */
-    public function send($message)
+    public function send(string $message)
     {
         $header  = pack('N', strlen($message));
         socket_write($this->client_socket, $header);
@@ -96,16 +94,13 @@ class TcpBuilder
         $data = '';
         $remainingSize = $this->getDataSize();
         while ($remainingSize > 0) {
-            try {
-                $chunk = socket_read(
-                    $this->client_socket,
-                    min($this->bufferSize, $remainingSize)
-                );
-            } catch (SocketsException $err) {
-                throw new Exception("Erreur lors de la lecture des données");
-            }
+            $chunk = socket_read(
+                $this->client_socket,
+                min($this->bufferSize, $remainingSize)
+            );
+
             if ($chunk === "") {
-                throw new Exception("La connexion a été fermée");
+                throw new SocketsException("Unexpected empty chunk");
             }
             $data .= $chunk;
             $remainingSize -= strlen($chunk);

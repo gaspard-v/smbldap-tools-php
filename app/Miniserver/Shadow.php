@@ -3,6 +3,7 @@
 namespace App\Miniserver;
 
 use function Safe\json_encode;
+use function Safe\json_decode;
 
 abstract class Shadow
 {
@@ -10,7 +11,7 @@ abstract class Shadow
         string $username,
         string $oldPassword,
         string $newPassword
-    ) {
+    ): array {
         $tcp = new TcpBuilder();
         $message = [
             "username" => $username,
@@ -18,7 +19,7 @@ abstract class Shadow
             "new_password" => $newPassword
         ];
         $message = json_encode($message);
-        $ret = $tcp->connect()->send($message)->receive();
-        echo $ret;
+        $data = $tcp->connect()->send($message)->receive();
+        return json_decode($data);
     }
 }
