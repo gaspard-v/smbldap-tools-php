@@ -30,8 +30,13 @@ class PasswdController extends Controller
             $errors->add('password', 'Password mismatch');
             return Redirect::back()->withErrors($errors);
         }
-        $oof = $request->user();
-        $request->session()->get("");
+        $current_password = $credentials['current_password'];
+        $new_password = $credentials['new_password'];
+        $user = $request->user();
+        [$uid] = $user->uid;
+
+        // TODO correct this
+        $this->changeShadow($uid, $current_password, $new_password);
         return view('passwd');
     }
 
@@ -52,7 +57,7 @@ class PasswdController extends Controller
         }
     }
 
-    protected function change_shadow(string $username, string $currentPassword, string $newPassword)
+    protected function changeShadow(string $username, string $currentPassword, string $newPassword)
     {
         if (!$this->passwdUserExists($username))
             return;
