@@ -8,6 +8,7 @@ use Illuminate\View\View;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Http\RedirectResponse;
+use App\Crypt\SmbHash;
 use function Safe\fopen;
 
 class PasswdController extends Controller
@@ -34,10 +35,14 @@ class PasswdController extends Controller
         $new_password = $credentials['new_password'];
         $user = $request->user();
         [$uid] = $user->uid;
+        $return_value = new MessageBag();
+        $shadow_return = $this->changeShadow($uid, $current_password, $new_password);
+        if ($shadow_return)
+            $return_value->add('shadow', $shadow_return);
 
-        // TODO correct this
-        $this->changeShadow($uid, $current_password, $new_password);
-        return view('passwd');
+        // TODO disable SSL verification to change password
+        $return_value->add('ldap', $this->changeLdap($user, $new_password));
+        return Redirect::back();
     }
 
     protected function passwdUserExists(string $username): bool
@@ -61,6 +66,14 @@ class PasswdController extends Controller
     {
         if (!$this->passwdUserExists($username))
             return;
-        $response = Shadow::chpasswd($username, $currentPassword, $newPassword);
+        return Shadow::chpasswd($username, $currentPassword, $newPassword);
+    }
+
+    protected function changeLdap(mixed $user, string $newPassword)
+    {
+        $nthash = SmbHash::nthash($newPassword);
+        $user->password = $newPassword;
+        $user->sambaNTPassword = $nthash;
+        return $user->save();
     }
 }
