@@ -2,9 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\PasswdController;
 
-use App\Miniserver\Shadow;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,7 +17,6 @@ use App\Miniserver\Shadow;
 */
 
 Route::get('/', function () {
-    Shadow::chpasswd("loled", "123", "123");
     return view('welcome');
 });
 
@@ -39,4 +37,7 @@ Route::get('/chpasswd', function () {
     return view('chpasswd');
 })->name('chpasswd')->middleware(['auth', 'share.authenticated.user']);
 
-// Route::post('/chpasswd', "")->name('chpasswd')->middleware(['auth', 'share.authenticated.user']);
+Route::post(
+    '/chpasswd',
+    [PasswdController::class, 'change_password']
+)->name('chpasswd')->middleware(['auth', 'share.authenticated.user']);
