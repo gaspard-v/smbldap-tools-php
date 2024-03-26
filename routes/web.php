@@ -32,10 +32,9 @@ Route::post(
 )->name('login');
 
 Route::get('/dashboard', function () {
-    $user = Auth::user();
-    [$username] = $user->uid;
-    return view(
-        'dashboard',
-        ['username' => $username]
-    );
-})->name('dashboard')->middleware('auth');
+    return view('dashboard');
+})->name('dashboard')->middleware(['auth', 'share.authenticated.user']);
+
+Route::get('/chpasswd', function () {
+    return view('chpasswd');
+})->name('chpasswd')->middleware(['auth', 'share.authenticated.user']);

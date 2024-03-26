@@ -10,6 +10,10 @@
         <header>
             <h2><a href={{ url('/') }}>Index</a></h2>
             <h1>@yield('title', 'Welcome')</h1>
+            @if (Route::has('logout'))
+            @auth
+            <a href="{{ route('logout', absolute: false) }}">Logout</a>
+            @endif
         </header>
         <main>
             @yield('content')

@@ -15,8 +15,8 @@ class LoginController extends Controller
             'password.required' => 'Password is required!'
         ];
         $credentials = $request->validate([
-            'username' => ['required'],
-            'password' => ['required'],
+            'username' => ['required', 'max:25'],
+            'password' => ['required', 'max:25'],
         ], $messages);
         $credentials = [
             'uid' => $credentials['username'],
