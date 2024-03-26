@@ -38,3 +38,5 @@ Route::get('/dashboard', function () {
 Route::get('/chpasswd', function () {
     return view('chpasswd');
 })->name('chpasswd')->middleware(['auth', 'share.authenticated.user']);
+
+// Route::post('/chpasswd', "")->name('chpasswd')->middleware(['auth', 'share.authenticated.user']);

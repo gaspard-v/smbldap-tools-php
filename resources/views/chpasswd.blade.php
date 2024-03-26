@@ -21,4 +21,9 @@
         <button type="submit">Change Password</button>
     </div>
 </form>
+@if ($errors->has('password'))
+    <span>
+        <strong>{{ $errors->first('password') }}</strong>
+    </span>
+@endif
 @endsection
