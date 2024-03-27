@@ -17,9 +17,4 @@
             <button type="submit">Login</button>
         </div>
     </form>
-    @if ($errors->has('username'))
-        <span>
-            <strong>{{ $errors->first('username') }}</strong>
-        </span>
-    @endif
 @endsection

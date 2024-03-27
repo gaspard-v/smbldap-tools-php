@@ -35,20 +35,20 @@ class PasswdController extends Controller
         $new_password = $credentials['new_password'];
         $user = $request->user();
         [$uid] = $user->uid;
-        $return_value = new MessageBag();
         $shadow_return = $this->changeShadow($uid, $current_password, $new_password);
+        $return_value = [];
         if ($shadow_return)
-            $return_value->add('shadow', $shadow_return);
+            $return_value[] = ['shadow' => $shadow_return];
 
         // TODO disable SSL verification to change password
-        $return_value->add('ldap', $this->changeLdap($user, $new_password));
-        return Redirect::back();
+        $return_value[] = ['ldap' => $this->changeLdap($user, $new_password)];
+        return redirect('/dashboard')->with($return_value);
     }
 
     protected function passwdUserExists(string $username): bool
     {
         $passwd_file = '/etc/passwd';
-        $handle = @fopen($passwd_file, 'r');
+        $handle = fopen($passwd_file, 'r');
         try {
             while (($line = fgets($handle)) !== false) {
                 $fields = explode(':', $line);
@@ -58,7 +58,7 @@ class PasswdController extends Controller
             }
             return false;
         } finally {
-            fclose($handle);
+            @fclose($handle);
         }
     }
 

@@ -20,6 +20,6 @@ abstract class Shadow
         ];
         $message = json_encode($message);
         $data = $tcp->connect()->send($message)->receive();
-        return json_decode($data);
+        return json_decode($data, true);
     }
 }

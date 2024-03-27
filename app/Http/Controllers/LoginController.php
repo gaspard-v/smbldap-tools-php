@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\MessageBag;
 
 class LoginController extends Controller
 {
@@ -22,13 +23,12 @@ class LoginController extends Controller
             'uid' => $credentials['username'],
             'password' => $credentials['password'],
         ];
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            return redirect()->intended('dashboard');
+        if (!Auth::attempt($credentials)) {
+            $errors = new MessageBag();
+            $errors->add('credentials', 'The provided credentials do not match our records.');
+            return back()->withErrors($errors);
         }
-        return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
-        ])->onlyInput('username');
+        $request->session()->regenerate();
+        return redirect()->intended('dashboard');
     }
 }
