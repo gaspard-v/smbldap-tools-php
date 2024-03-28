@@ -6,12 +6,11 @@
     <a href="{{ route('chpasswd', absolute: false) }}">Change Password</a>
     @endif
     @if (session('shadow'))
-    <p>Shadow password modified successfully</p>
-    <div>
+    <p>
         {{ session('shadow') }}
-    </div>
+    </p>
     @endif
     @if (session('ldap'))
-    <p>ldap password modified successfully</p>
+    <p>{{ session('ldap') }}</p>
     @endif
 @endsection

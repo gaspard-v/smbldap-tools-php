@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Http\RedirectResponse;
 use App\Crypt\SmbHash;
 use function Safe\fopen;
+use function Safe\json_encode;
 
 class PasswdController extends Controller
 {
@@ -38,10 +39,10 @@ class PasswdController extends Controller
         $shadow_return = $this->changeShadow($uid, $current_password, $new_password);
         $return_value = [];
         if ($shadow_return)
-            $return_value[] = ['shadow' => $shadow_return];
+            $return_value = array_merge($return_value, ['shadow' => json_encode($shadow_return)]);
+        $this->changeLdap($user, $new_password);
 
-        // TODO disable SSL verification to change password
-        $return_value[] = ['ldap' => $this->changeLdap($user, $new_password)];
+        $return_value = array_merge($return_value, ['ldap' => "Password modified"]);
         return redirect('/dashboard')->with($return_value);
     }
 

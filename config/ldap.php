@@ -38,6 +38,7 @@ return [
             'use_ssl' => env('LDAP_SSL', false),
             'use_tls' => env('LDAP_TLS', false),
             'use_sasl' => env('LDAP_SASL', false),
+            'allow_insecure_password_changes' => env('LDAP_ALLOW_INSECURE_PASSWORD_CHANGES', false),
             'sasl_options' => [
                 // 'mech' => 'GSSAPI',
             ],
