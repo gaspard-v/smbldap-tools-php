@@ -18,11 +18,13 @@ use App\Http\Controllers\PasswdController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name("index");
 
 Route::get('/login', function () {
     return view('login');
 });
+
+Route::get('/logout', [LoginController::class, 'logout'])->name('logout')->middleware(['auth']);
 
 Route::post(
     '/login',
