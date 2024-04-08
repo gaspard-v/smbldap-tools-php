@@ -106,7 +106,7 @@ class ServerBuilder:
             if return_data:
                 self._send(conn, return_data)
         except socket.timeout:
-            log().debug(f"Socket has timed out. (This is an expected behavior)")
+            log().debug("Socket has timed out. (This is an expected behavior)")
             return
         except Exception as err:
             error_data = self.consumer.handle_error(err)

@@ -1,5 +1,4 @@
 import logging
-from logging.handlers import SysLogHandler
 from logging import Logger as OrigLogger
 from .singleton import SingletonMeta
 
