@@ -5,12 +5,9 @@
     @if (Route::has('chpasswd'))
     <a href="{{ route('chpasswd', absolute: false) }}">Change Password</a>
     @endif
-    @if (session('shadow'))
-    <p>
-        {{ session('shadow') }}
-    </p>
-    @endif
-    @if (session('ldap'))
-    <p>{{ session('ldap') }}</p>
-    @endif
+    @foreach (['shadow', 'ldap'] as $key)
+        @if (session($key))
+            <p>{{ session($key) }}</p>
+        @endif
+    @endforeach
 @endsection
