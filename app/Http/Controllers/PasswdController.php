@@ -63,10 +63,21 @@ class PasswdController extends Controller
         }
     }
 
+    static public function getDaysSinceEpoch(): int
+    {
+        $today = time();
+        $epochTime = strtotime('1970-01-01');
+        $daysSinceEpoch = ($today - $epochTime) / (24 * 60 * 60);
+
+        return (int)$daysSinceEpoch;
+    }
+
     protected function changeShadow(string $username, string $currentPassword, string $newPassword)
     {
         if (!$this->passwdUserExists($username))
             return;
+
+        // TODO add shadow last change and rollback function
         return Shadow::chpasswd($username, $currentPassword, $newPassword);
     }
 
@@ -75,6 +86,7 @@ class PasswdController extends Controller
         $nthash = SmbHash::nthash($newPassword);
         $user->password = $newPassword;
         $user->sambaNTPassword = $nthash;
+        $user->shadowLastChange = self::getDaysSinceEpoch();
         return $user->save();
     }
 }
