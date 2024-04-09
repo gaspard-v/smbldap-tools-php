@@ -4,6 +4,7 @@ import io
 from ..exceptions.shadow import WrongPasswordException, UnknowUserException
 from ..utils.logger import log
 from typing import Optional
+import time
 
 
 class Chpasswd:
@@ -41,16 +42,30 @@ class Chpasswd:
         encrypted_password = self.user_entry.sp_pwdp
         return self.crypt.crypt_new(self.new_password, encrypted_password)
 
+    @staticmethod
+    def _get_days_since_epoch():
+        today = time.time()
+        epoch_time = time.mktime(time.strptime("1970-01-01", "%Y-%m-%d"))
+        days_since_epoch = (today - epoch_time) / (24 * 60 * 60)
+        return int(days_since_epoch)
+
     def _new_shadow_file(
         self, shadow_file: io.TextIOWrapper, hashed_password: str
     ) -> list[str]:
         new_lines: list[str] = []
+        username_idx = 0
+        password_idx = 1
+        days_epoch_idx = 2
+        days_epoch = self._get_days_since_epoch()
+
+        # TODO Add check for min and max password age and warning days!
         for line in shadow_file.readlines():
             fields = line.split(":")
-            if fields[0] != self.username:
+            if fields[username_idx] != self.username:
                 new_lines.append(line)
                 continue
-            fields[1] = hashed_password
+            fields[password_idx] = hashed_password
+            fields[days_epoch_idx] = str(days_epoch)
             new_line = ":".join(fields)
             new_lines.append(new_line)
         return new_lines
