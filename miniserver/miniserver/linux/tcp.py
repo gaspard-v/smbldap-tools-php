@@ -32,6 +32,8 @@ class ConsumerAbstract(ABC):
         log().exception(error)
         return self._get_error_message(error, 500)
 
+    def client_disconnected_event(self, addr): ...
+
 
 class ServerBuilder:
     def __init__(
@@ -112,9 +114,11 @@ class ServerBuilder:
             error_data = self.consumer.handle_error(err)
             return self._error(conn, error_data)
         finally:
-            if conn:
-                conn.close()
-                log().debug(f"closing connection with {addr}")
+            if not conn:
+                return
+            conn.close()
+            self.consumer.client_disconnected_event(addr)
+            log().debug(f"closing connection with {addr}")
 
     def run(self):
         while not self.consumer.stop_loop():

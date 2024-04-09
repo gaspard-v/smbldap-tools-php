@@ -9,6 +9,7 @@ import time
 
 class Chpasswd:
     user_entry: Optional[spwd.struct_spwd]
+    SHADOW_PATH = "/etc/shadow"
 
     def __init__(self, username: str, old_password: str, new_password: str) -> None:
         self.username = username
@@ -16,6 +17,10 @@ class Chpasswd:
         self.new_password = new_password
         self.crypt = Crypt()
         self.user_entry = None
+        self.original_shadow_file: list[str] = []
+
+    def reset(self):
+        self.original_shadow_file = []
 
     def _get_user_entry(self):
         if self.user_entry:
@@ -60,6 +65,7 @@ class Chpasswd:
 
         # TODO Add check for min and max password age and warning days!
         for line in shadow_file.readlines():
+            self.original_shadow_file.append(line)
             fields = line.split(":")
             if fields[username_idx] != self.username:
                 new_lines.append(line)
@@ -71,11 +77,10 @@ class Chpasswd:
         return new_lines
 
     def _modify_shadow_file(self, hashed_password: str) -> list[str]:
-        shadow_path = "/etc/shadow"
         new_lines: list[str] = []
-        with io.open(shadow_path, "r") as shadow_file:
+        with io.open(self.SHADOW_PATH, "r") as shadow_file:
             new_lines = self._new_shadow_file(shadow_file, hashed_password)
-        with io.open(shadow_path, "w") as shadow_file:
+        with io.open(self.SHADOW_PATH, "w") as shadow_file:
             shadow_file.writelines(new_lines)
         return new_lines
 
@@ -84,3 +89,10 @@ class Chpasswd:
         self._modify_shadow_file(hashed_password)
         log().info(f"{self.username} has modified its password!")
         return self
+
+    def rollback(self) -> Optional[list[str]]:
+        if not self.original_shadow_file:
+            return
+        with io.open(self.SHADOW_PATH, "w") as shadow_file:
+            shadow_file.writelines(self.original_shadow_file)
+        return self.original_shadow_file
