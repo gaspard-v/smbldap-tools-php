@@ -2,11 +2,14 @@ from typing import Optional
 from .linux.tcp import ConsumerAbstract
 from .linux.signal import Signal
 from .models.shadow import Shadow
+from .models.base import BaseRequest
+from .models.enum.action import Action
 from .linux.shadow import Chpasswd
 from .exceptions.shadow import (
     UnknowUserException,
     WrongPasswordException,
     InvalidCredentialException,
+    ImpossibleRollback,
 )
 from pydantic import ValidationError
 import json
@@ -18,9 +21,25 @@ class ShadowConsumer(ConsumerAbstract):
         self.signal.capture()
         self.chpasswd: Optional[Chpasswd] = None
 
-    def consume(self, data: bytearray):
+    def consume(self, data: bytearray) -> bytes:
         obj = json.loads(data)
-        shadow = Shadow(**obj)
+        requests = BaseRequest(**obj)
+        if Action.CHANGE_PASSWORD == requests.action:
+            return self._change_password(requests)
+        if Action.ROLLBACK == requests.action:
+            return self._rollback()
+
+        # Would never be reached
+        return bytes()
+
+    def _rollback(self) -> bytes:
+        if not self.chpasswd:
+            raise ImpossibleRollback()
+        self.chpasswd.rollback()
+        return self._get_response_message("Rollback is successfull", 200)
+
+    def _change_password(self, requests: BaseRequest) -> bytes:
+        shadow = Shadow(**requests.data)
         self.chpasswd = Chpasswd(
             shadow.username, shadow.old_password, shadow.new_password
         )

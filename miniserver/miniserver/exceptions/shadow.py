@@ -23,3 +23,10 @@ class InvalidCredentialException(Exception):
         default_message = "Invalid Credentials"
         self.message = message or default_message
         super().__init__(self.message)
+
+
+class ImpossibleRollback(Exception):
+    def __init__(self, message: Optional[str] = None):
+        default_message = "Impossible to rollback the password"
+        self.message = message or default_message
+        super().__init__(self.message)
