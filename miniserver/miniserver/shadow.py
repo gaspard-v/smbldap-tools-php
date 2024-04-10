@@ -60,7 +60,11 @@ class ShadowConsumer(ConsumerAbstract):
 
     def handle_error(self, error: Exception):
         credential_exception = (UnknowUserException, WrongPasswordException)
-        user_exception = (ValidationError, json.decoder.JSONDecodeError)
+        user_exception = (
+            ValidationError,
+            json.decoder.JSONDecodeError,
+            ImpossibleRollback,
+        )
         if isinstance(error, credential_exception):
             return self._handle_credential_exception()
         if isinstance(error, user_exception):

@@ -5,21 +5,46 @@ namespace App\Miniserver;
 use function Safe\json_encode;
 use function Safe\json_decode;
 
-abstract class Shadow
+class Shadow
 {
-    static public function chpasswd(
+    const CHANGE_PASSWORD = "CHANGE_PASSWORD";
+    const ROLLBACK = "ROLLBACK";
+
+    protected TcpBuilder $tcp;
+
+    public function __construct()
+    {
+        $this->tcp = new TcpBuilder();
+        $this->tcp->connect();
+    }
+
+    public function chpasswd(
         string $username,
         string $oldPassword,
         string $newPassword
     ): array {
-        $tcp = new TcpBuilder();
         $message = [
-            "username" => $username,
-            "old_password" => $oldPassword,
-            "new_password" => $newPassword
+            "action" => self::CHANGE_PASSWORD,
+            "data" => [
+                "username" => $username,
+                "old_password" => $oldPassword,
+                "new_password" => $newPassword
+            ]
         ];
         $message = json_encode($message);
-        $data = $tcp->connect()->send($message)->receive();
+        $data = $this->tcp->send($message)->receive();
         return json_decode($data, true);
+    }
+    public function rollback(): array
+    {
+        $message = ["action" => self::ROLLBACK];
+        $message = json_encode($message);
+        $data = $this->tcp->send($message)->receive();
+        return json_decode($data, true);
+    }
+
+    public function close()
+    {
+        return $this->tcp->close();
     }
 }

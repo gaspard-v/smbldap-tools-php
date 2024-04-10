@@ -40,7 +40,8 @@ class PasswdController extends Controller
         $return_value = [];
         if ($shadow_return)
             $return_value = array_merge($return_value, ['shadow' => json_encode($shadow_return)]);
-        $this->changeLdap($user, $new_password);
+        if (!isset($shadow_return["rollback"]))
+            $this->changeLdap($user, $new_password);
 
         $return_value = array_merge($return_value, ['ldap' => "Password modified"]);
         return redirect('/dashboard')->with($return_value);
@@ -76,9 +77,13 @@ class PasswdController extends Controller
     {
         if (!$this->passwdUserExists($username))
             return;
-
-        // TODO add shadow last change and rollback function
-        return Shadow::chpasswd($username, $currentPassword, $newPassword);
+        $miniserver = new Shadow();
+        $return_value =  $miniserver->chpasswd($username, $currentPassword, $newPassword);
+        if (200 != $return_value['status_code']) {
+            $return_value["rollback"] = $miniserver->rollback();
+        }
+        $miniserver->close();
+        return $return_value;
     }
 
     protected function changeLdap(mixed $user, string $newPassword)
