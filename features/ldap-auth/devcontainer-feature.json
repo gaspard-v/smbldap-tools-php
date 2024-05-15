@@ -4,27 +4,27 @@
     "name": "LDAP PAM auth",
     "documentationURL": "https://github.com/gaspard-v/smbldap-tools-php/tree/main/features/ldap-auth",
     "options": {
-        "admin-password": {
+        "adminPassword": {
             "type": "string",
             "default": "123",
             "description": "Set the admin password"
         },
-        "ldap-prefix": {
+        "ldapPrefix": {
             "type": "string",
             "default": "dc=test,dc=org",
             "description": "Set the ldap prefix"
         },
-        "first-user": {
+        "firstUser": {
             "type": "string",
             "default": "usertest",
             "description": "Set the first username created in the LDAP database"
         },
-        "first-password": {
+        "firstPassword": {
             "type": "string",
             "default": "123",
             "description": "Set the password of the first LDAP user"
         },
-        "first-group": {
+        "firstGroup": {
             "type": "string",
             "default": "usertest",
             "description": "Set the first user's group name"
